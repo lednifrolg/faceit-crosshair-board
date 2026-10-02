@@ -1,0 +1,37 @@
+<!doctype html>
+<!-- FACEIT Crosshair Board - new tab page
+     Copyright (C) 2026 Filip Tomasovych
+     SPDX-License-Identifier: GPL-3.0-or-later -->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>Crosshair Board</title>
+  <link rel="icon" href="icons/icon32.png" sizes="32x32">
+  <link rel="icon" href="icons/icon16.png" sizes="16x16">
+  <link rel="preload" href="fonts/JetBrainsMono-Regular.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="newtab.css">
+  <!-- Classic scripts: they expose CS2CrosshairRenderer and PixelCrosshair as globals. -->
+  <script src="lib/crosshairRenderer.js"></script>
+  <script src="lib/pixelCrosshair.js"></script>
+  <script type="module" src="newtab.js"></script>
+</head>
+<body>
+  <header class="head">
+    <h1 class="title">&gt; crosshair_board<span class="cursor" aria-hidden="true">_</span></h1>
+    <p class="status" id="status" role="status" aria-live="polite">&nbsp;</p>
+  </header>
+
+  <form class="add" id="add" autocomplete="off">
+    <label class="prompt" for="add-input">&gt; add:</label>
+    <input class="add-input" id="add-input" name="nickname" spellcheck="false"
+           placeholder="faceit nickname" maxlength="32" aria-describedby="add-msg">
+    <span class="add-msg" id="add-msg" aria-live="polite"></span>
+  </form>
+
+  <main class="board" id="board"></main>
+
+  <div class="tip" id="tip" role="tooltip" hidden></div>
+</body>
+</html>

@@ -1,0 +1,138 @@
+[
+  {
+    "_id": {
+      "matchId": "6ab98353860802c6222f663f",
+      "playerId": "3b536dda-e3dd-40cd-baed-7e66ab050c8f"
+    },
+    "matchId": "1-d98dfbef-ffda-40d4-9bce-7d36de789c0b",
+    "date": 1790542675000,
+    "i1": "de_nuke",
+    "i18": "13 / 7",
+    "elo": "3392",
+    "elo_delta": "21",
+    "status": "APPLIED",
+    "gameMode": "5v5",
+    "teamId": "6fb2cf05-07bf-4828-8647-8158a792e9f6"
+  },
+  {
+    "_id": {
+      "matchId": "6ab97b399f45f5f2ad41b549",
+      "playerId": "3b536dda-e3dd-40cd-baed-7e66ab050c8f"
+    },
+    "matchId": "1-3e98c2be-3403-4cc4-9adf-54959725fa32",
+    "date": 1790540601000,
+    "i1": "de_cache",
+    "i18": "13 / 8",
+    "elo": "3371",
+    "elo_delta": "20",
+    "status": "APPLIED",
+    "gameMode": "5v5",
+    "teamId": "6fb2cf05-07bf-4828-8647-8158a792e9f6"
+  },
+  {
+    "_id": {
+      "matchId": "6ab96df9860802c6222f4f7c",
+      "playerId": "3b536dda-e3dd-40cd-baed-7e66ab050c8f"
+    },
+    "matchId": "1-98f9f57a-3c2c-4bb1-846d-37bdf7e6f598",
+    "date": 1790537209000,
+    "i1": "de_dust2",
+    "i18": "13 / 10",
+    "elo": "3351",
+    "elo_delta": "23",
+    "status": "APPLIED",
+    "gameMode": "5v5",
+    "teamId": "6fb2cf05-07bf-4828-8647-8158a792e9f6"
+  },
+  {
+    "_id": {
+      "matchId": "6a919db30357456c859589d0",
+      "playerId": "3b536dda-e3dd-40cd-baed-7e66ab050c8f"
+    },
+    "matchId": "1-76a81cc8-7d62-4503-b805-f68800e7c7fe",
+    "date": 1787927986000,
+    "i1": "de_mirage",
+    "i18": "16 / 12",
+    "status": "APPLIED",
+    "gameMode": "5v5",
+    "teamId": "3b536dda-e3dd-40cd-baed-7e66ab050c8f"
+  },
+  {
+    "_id": {
+      "matchId": "6a907c1dbde6ea0ab88f8dcd",
+      "playerId": "3b536dda-e3dd-40cd-baed-7e66ab050c8f"
+    },
+    "matchId": "1-2cba0f84-331c-4bfb-b968-535c24725980",
+    "date": 1787853853000,
+    "i1": "de_ancient",
+    "i18": "10 / 13",
+    "status": "APPLIED",
+    "gameMode": "5v5",
+    "teamId": "23b6ffbb-86ec-47ab-acaa-9c76bed0af66"
+  },
+  {
+    "_id": {
+      "matchId": "6a9070622cc07aa7cc3ad32c",
+      "playerId": "3b536dda-e3dd-40cd-baed-7e66ab050c8f"
+    },
+    "matchId": "1-0266db77-c6c0-4843-b3fc-36a570dcf974",
+    "date": 1787850849000,
+    "i1": "de_anubis",
+    "i18": "13 / 10",
+    "status": "APPLIED",
+    "gameMode": "5v5",
+    "teamId": "23b6ffbb-86ec-47ab-acaa-9c76bed0af66"
+  },
+  {
+    "_id": {
+      "matchId": "6a90653e238612b1556e1170",
+      "playerId": "3b536dda-e3dd-40cd-baed-7e66ab050c8f"
+    },
+    "matchId": "1-4e7c7ae1-afd2-4c1e-82d3-96049c1a5192",
+    "date": 1787847997000,
+    "i1": "de_mirage",
+    "i18": "10 / 13",
+    "status": "APPLIED",
+    "gameMode": "5v5",
+    "teamId": "3f31fb51-5179-4d2a-871f-831c46d51e5b"
+  },
+  {
+    "_id": {
+      "matchId": "6a905af3238612b1556e03cb",
+      "playerId": "3b536dda-e3dd-40cd-baed-7e66ab050c8f"
+    },
+    "matchId": "1-1d1b84b9-e7cc-4289-8591-c965df0556eb",
+    "date": 1787845363000,
+    "i1": "de_anubis",
+    "i18": "13 / 4",
+    "status": "APPLIED",
+    "gameMode": "5v5",
+    "teamId": "da235764-ca50-4d23-b071-38e9bf44a39b"
+  },
+  {
+    "_id": {
+      "matchId": "6a84b82c7ca2a90100abb254",
+      "playerId": "3b536dda-e3dd-40cd-baed-7e66ab050c8f"
+    },
+    "matchId": "1-7e33777d-20de-4304-8980-dac55f25f752",
+    "date": 1787082795000,
+    "i1": "de_cache",
+    "i18": "13 / 5",
+    "status": "APPLIED",
+    "gameMode": "5v5",
+    "teamId": "58f68286-29eb-4108-97e5-2d8d96c65e05"
+  },
+  {
+    "_id": {
+      "matchId": "6a80cf7faf3674efe9012d35",
+      "playerId": "3b536dda-e3dd-40cd-baed-7e66ab050c8f"
+    },
+    "matchId": "1-c83b7c28-fe5a-4f5a-9eeb-428b720b779e",
+    "date": 1786826623000,
+    "i1": "de_dust2",
+    "i18": "13 / 1",
+    "status": "APPLIED",
+    "gameMode": "5v5",
+    "teamId": "58f68286-29eb-4108-97e5-2d8d96c65e05"
+  }
+]

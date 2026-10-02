@@ -1,0 +1,81 @@
+/* FACEIT Crosshair Board - "add to board" button on FACEIT player profiles
+ * Copyright (C) 2026 Filip Tomasovych
+ * SPDX-License-Identifier: GPL-3.0-or-later */
+
+/* Injected into every www.faceit.com page, but only matches DOM that profileButton.js
+ * creates on a profile. `all: initial` keeps FACEIT's global styles (button resets, font,
+ * line-height, letter-spacing) from leaking in; everything the button needs is set here. */
+
+.fcb-root {
+  all: initial;
+  position: fixed;
+  /* Bottom left: on a desktop-width profile that is over the static profile column, not
+   * the match table (where Crosshair Peek's popups also appear). */
+  left: 24px;
+  bottom: 24px;
+  z-index: 2147483000; /* above FACEIT's sticky headers; its modals sit over the page anyway */
+  display: block;
+}
+
+.fcb-btn {
+  all: initial;
+  --fcb-fg: #00ff41;
+  --fcb-accent: #ff5500;
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  /* Wide enough for "[+] ADD TO BOARD" (16 letter-spaced characters), so swapping between
+   * the idle and busy labels never resizes the button. Only an error label is longer. */
+  min-width: calc(16ch + 16 * 0.06em + 2 * 14px + 2px);
+  height: 34px;
+  padding: 0 14px;
+  border: 1px solid #00ff4180;
+  border-radius: 0;
+  background: #000;
+  box-shadow: 0 0 0 4px #000, 0 8px 32px #000; /* a clean edge over whatever FACEIT shows below */
+  color: var(--fcb-fg);
+  font: 700 12px/1 "FCB JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+  -webkit-font-smoothing: antialiased;
+}
+
+.fcb-bracket { all: unset; color: #00ff4170; }
+
+.fcb-mark {
+  all: unset;
+  display: inline-block;
+  width: 1ch;
+  text-align: center;
+  color: var(--fcb-accent);
+}
+
+.fcb-text { all: unset; margin-left: 1ch; }
+
+.fcb-btn:hover { border-color: var(--fcb-fg); background: #001405; } /* 8% green, opaque: the page must not show through */
+
+.fcb-btn:focus-visible { outline: 1px solid var(--fcb-accent); outline-offset: 2px; }
+
+/* On the board: solid green, the one state that should read as "done" at a glance. */
+.fcb-btn.fcb-tone-on { border-color: var(--fcb-fg); background: var(--fcb-fg); color: #000; }
+.fcb-tone-on .fcb-bracket { color: #0009; }
+.fcb-tone-on .fcb-mark { color: #000; }
+
+/* Hovering ON BOARD previews the click. */
+.fcb-btn.fcb-tone-remove { background: #000; border-color: var(--fcb-accent); color: var(--fcb-accent); }
+.fcb-tone-remove .fcb-bracket { color: #ff550099; }
+
+.fcb-btn.fcb-tone-busy { color: #00ff41b3; cursor: progress; }
+.fcb-tone-busy .fcb-mark { color: var(--fcb-fg); animation: fcb-blink 1.06s steps(1) infinite; }
+
+.fcb-btn.fcb-tone-error { background: #000; border-color: var(--fcb-accent); color: var(--fcb-accent); }
+.fcb-tone-error .fcb-bracket { color: #ff550099; }
+
+@keyframes fcb-blink { 50% { opacity: 0; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .fcb-tone-busy .fcb-mark { animation: none; }
+}

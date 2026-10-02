@@ -1,0 +1,319 @@
+/* FACEIT Crosshair Board - new tab page
+ * Copyright (C) 2026 Filip Tomasovych
+ * SPDX-License-Identifier: GPL-3.0-or-later */
+
+@font-face {
+  font-family: "JetBrains Mono";
+  src: url("fonts/JetBrainsMono-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "JetBrains Mono";
+  src: url("fonts/JetBrainsMono-Bold.woff2") format("woff2");
+  font-weight: 700;
+  font-display: swap;
+}
+
+:root {
+  --bg: #000;
+  --fg: #00ff41;
+  --fg-2: #00ff41b3;  /* secondary text */
+  --fg-3: #00ff4170;  /* hints, labels */
+  --line: #00ff4129;  /* borders */
+  --line-hi: #00ff4180;
+  --accent: #ff5500;
+  --cell-bg: #0b0b0b;
+  --cell-check: #141414;
+
+  --cell: 76px;
+  --gap: 6px;
+  --name: 220px;
+  --pad: 40px;   /* page side padding */
+
+  --font: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  min-height: 100%;
+  background: var(--bg);
+  color: var(--fg);
+  font: 13px/1.5 var(--font);
+}
+
+html, .board { scrollbar-color: var(--line-hi) var(--bg); }
+
+::selection { background: var(--fg); color: var(--bg); }
+
+:focus-visible { outline: 1px solid var(--accent); outline-offset: 2px; }
+
+/* ------------------------------------------------------------------ header */
+
+.head { padding: 32px var(--pad) 0; }
+
+.title {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.cursor { animation: blink 1.06s steps(1) infinite; }
+
+@keyframes blink { 50% { opacity: 0; } }
+
+.status {
+  margin: 4px 0 0;
+  min-height: 1.5em;
+  color: var(--fg-3);
+}
+
+.status.trouble { color: var(--accent); }
+
+/* --------------------------------------------------------------------- add */
+
+.add {
+  display: flex;
+  align-items: baseline;
+  gap: 1ch;
+  margin: 20px var(--pad) 0;
+  max-width: calc(var(--name) + 10 * (var(--cell) + var(--gap)));
+}
+
+.prompt { color: var(--fg-2); white-space: nowrap; }
+
+.add-input {
+  flex: 0 1 24ch;
+  min-width: 12ch;
+  padding: 0 0 1px;
+  border: 0;
+  border-bottom: 1px solid var(--line-hi);
+  border-radius: 0;
+  background: transparent;
+  color: var(--fg);
+  font: inherit;
+  caret-color: var(--fg);
+}
+
+.add-input::placeholder { color: var(--fg-3); }
+
+.add-input:focus { outline: none; border-bottom-color: var(--fg); }
+
+.add-input:disabled { color: var(--fg-3); }
+
+.add-msg {
+  overflow: hidden;
+  color: var(--fg-2);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.add-msg.error { color: var(--accent); }
+
+/* ------------------------------------------------------------------- board */
+
+.board {
+  padding: 24px var(--pad) 48px;
+  overflow-x: auto;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: var(--name) repeat(10, var(--cell));
+  gap: var(--gap);
+  width: max-content;
+}
+
+.colhead {
+  height: 18px;
+  color: var(--fg-3);
+  font-size: 11px;
+  line-height: 18px;
+}
+
+.colhead.oldest { text-align: right; }
+
+.colhead.corner {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  background: var(--bg);
+  box-shadow: calc(-1 * var(--pad)) 0 0 var(--bg), var(--gap) 0 0 var(--bg);
+}
+
+.empty-board {
+  margin: 0;
+  color: var(--fg-3);
+}
+
+/* Row header: nickname, level, elo, remove. */
+/* Sticky, so the names stay put when a narrow window scrolls the grid sideways. The
+ * grid gap and the page padding on the left are painted over too, or cells would show
+ * through them while scrolling. */
+.player {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-width: 0;
+  height: var(--cell);
+  padding: 0 28px 0 10px;
+  border-left: 2px solid var(--line);
+  background: var(--bg);
+  box-shadow: calc(-1 * var(--pad)) 0 0 var(--bg), var(--gap) 0 0 var(--bg);
+}
+
+.player:hover, .player:focus-within { border-left-color: var(--fg); }
+
+.nick {
+  overflow: hidden;
+  color: var(--fg);
+  font-weight: 700;
+  font-size: 14px;
+  text-decoration: none;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.nick:hover { text-decoration: underline; text-underline-offset: 3px; }
+
+.meta { color: var(--fg-3); font-size: 12px; font-variant-numeric: tabular-nums; }
+
+.meta .num { color: var(--accent); }
+
+.remove {
+  position: absolute;
+  top: 50%;
+  right: 0;
+  transform: translateY(-50%);
+  padding: 2px 4px;
+  border: 0;
+  background: none;
+  color: var(--fg-3);
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+  opacity: 0;
+}
+
+.player:hover .remove, .remove:focus-visible { opacity: 1; }
+
+.remove:hover { color: var(--accent); }
+
+/* Cells */
+.cell {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--cell);
+  height: var(--cell);
+  padding: 0;
+  overflow: hidden; /* a large crosshair is cropped around its centre, never rescaled */
+  border: 1px solid var(--line);
+  background:
+    linear-gradient(45deg, var(--cell-check) 25%, transparent 25%) 0 0 / 8px 8px,
+    linear-gradient(-45deg, var(--cell-check) 25%, transparent 25%) 0 4px / 8px 8px,
+    var(--cell-bg);
+  color: var(--fg-3);
+  font: inherit;
+  font-size: 11px;
+  line-height: 1.2;
+  text-align: center;
+  cursor: default;
+}
+
+.cell canvas {
+  flex: none;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+
+.cell.has-code { cursor: copy; }
+
+.cell.retry { cursor: pointer; }
+
+.cell.retry:hover { border-color: var(--line-hi); color: var(--fg-2); }
+
+.cell.pending { color: var(--fg-2); }
+
+.cell.has-code:hover, .cell:focus-visible { border-color: var(--fg); }
+
+/* Same crosshair as the match before: step back so the changes stand out. Never the
+ * latest column: that is the crosshair the player uses now. */
+.cell.same canvas { opacity: 0.45; }
+
+.cell.same:hover canvas, .cell.same:focus-visible canvas { opacity: 1; }
+
+/* Changed since the match before. */
+.cell.changed { border-color: #ff550099; }
+
+.cell.changed::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  border-top: 10px solid var(--accent);
+  border-right: 10px solid transparent;
+}
+
+.cell.empty {
+  border-style: dashed;
+  border-color: #00ff4114;
+  background: none;
+}
+
+.cell.loading::after {
+  content: "_";
+  color: var(--fg);
+  font-size: 16px;
+  animation: blink 1.06s steps(1) infinite;
+}
+
+.cell.copied::after {
+  content: "COPIED";
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg);
+  color: var(--accent);
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 0.06em;
+}
+
+/* ----------------------------------------------------------------- tooltip */
+
+.tip {
+  position: fixed;
+  z-index: 10;
+  max-width: 360px;
+  padding: 8px 10px;
+  border: 1px solid var(--line-hi);
+  background: #000;
+  box-shadow: 0 0 0 4px #000, 0 8px 32px #000;
+  color: var(--fg-2);
+  font-size: 12px;
+  line-height: 1.6;
+  pointer-events: none;
+}
+
+.tip .tip-head { color: var(--fg); }
+
+.tip .tip-code { color: var(--fg); word-break: break-all; }
+
+.tip .tip-hint { color: var(--fg-3); }
+
+.tip .tip-new { color: var(--accent); }
+
+@media (prefers-reduced-motion: reduce) {
+  .cursor, .cell.loading::after { animation: none; }
+}

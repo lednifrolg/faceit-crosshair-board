@@ -1,0 +1,46 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Test
+        run: node --test
+
+      - name: Check tag matches manifest version
+        run: |
+          tag="${GITHUB_REF_NAME#v}"
+          manifest="$(jq -r .version src/manifest.json)"
+          if [ "$tag" != "$manifest" ]; then
+            echo "::error::tag $GITHUB_REF_NAME does not match src/manifest.json version $manifest"
+            exit 1
+          fi
+          echo "version=$manifest" >> "$GITHUB_ENV"
+
+      - name: Build zip
+        run: |
+          mkdir -p dist/pkg
+          cp -r src/. dist/pkg/
+          cp LICENSE THIRD-PARTY.md README.md dist/pkg/
+          cd dist/pkg
+          zip -qr "../faceit-crosshair-board-v${version}.zip" .
+
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/faceit-crosshair-board-v${{ env.version }}.zip
+          generate_release_notes: true

@@ -1,0 +1,138 @@
+{
+  "payload": {
+    "id": "1-d98dfbef-ffda-40d4-9bce-7d36de789c0b",
+    "game": "cs2",
+    "match_round_number": 1,
+    "cs2": {
+      "teams": [
+        {
+          "team_id": "6fb2cf05-07bf-4828-8647-8158a792e9f6",
+          "score": 13,
+          "first_half_score": 8,
+          "second_half_score": 5,
+          "players": [
+            {
+              "elo": 2823,
+              "elo_delta": 21,
+              "crosshair": "CSGO-NPuOr-zzw65-BoYMd-pBYmK-POz9H",
+              "stats": {
+                "kills": 13,
+                "deaths": 14
+              },
+              "is_calibrating": false,
+              "playerId": "5a4e258d-c912-46b6-94f1-984d59150f82"
+            },
+            {
+              "elo": 2971,
+              "elo_delta": 21,
+              "crosshair": "CSGO-cza9w-45DzL-WJKz5-YO593-RL3fF",
+              "stats": {
+                "kills": 21,
+                "deaths": 12
+              },
+              "is_calibrating": false,
+              "playerId": "9356a075-fedc-46ee-96f0-38371035e926"
+            },
+            {
+              "elo": 3162,
+              "elo_delta": 21,
+              "crosshair": "CSGO-nvYhy-b3GHp-4vbQP-uoTxh-jTzTC",
+              "stats": {
+                "kills": 13,
+                "deaths": 14
+              },
+              "is_calibrating": false,
+              "playerId": "ecd004fa-0215-4a42-965b-07ebefd69f0c"
+            },
+            {
+              "elo": 3371,
+              "elo_delta": 21,
+              "crosshair": "CSGO-43Xd3-akOjE-fOHmW-GoRhM-sPcAB",
+              "stats": {
+                "kills": 21,
+                "deaths": 13
+              },
+              "is_calibrating": false,
+              "playerId": "3b536dda-e3dd-40cd-baed-7e66ab050c8f"
+            },
+            {
+              "elo": 3244,
+              "elo_delta": 21,
+              "crosshair": "CSGO-VpGLE-fWvPH-q5P6H-PO9DZ-6hzsP",
+              "stats": {
+                "kills": 16,
+                "deaths": 14
+              },
+              "is_calibrating": false,
+              "playerId": "de21905f-47e9-46c2-bfd2-e56f63795c87"
+            }
+          ]
+        },
+        {
+          "team_id": "aabbc7ac-3ce2-4226-84ad-2651dfb9629e",
+          "score": 7,
+          "first_half_score": 4,
+          "second_half_score": 3,
+          "players": [
+            {
+              "elo": 2953,
+              "elo_delta": -23,
+              "crosshair": "CSGO-2rttS-Lemby-E67JC-RTvS4-jnkzO",
+              "stats": {
+                "kills": 14,
+                "deaths": 15
+              },
+              "is_calibrating": false,
+              "playerId": "de6a3f96-0b0d-486d-a855-6632854fd4b6"
+            },
+            {
+              "elo": 2943,
+              "elo_delta": -23,
+              "crosshair": "CSGO-ibGNo-nOUBV-NEmcO-bnUmY-7reRF",
+              "stats": {
+                "kills": 14,
+                "deaths": 17
+              },
+              "is_calibrating": false,
+              "playerId": "68a899f2-8e6d-43c2-90a9-5b1c77a52f30"
+            },
+            {
+              "elo": 3309,
+              "elo_delta": -23,
+              "crosshair": "CSGO-yYDdn-owBnk-Czt8a-tc6Cx-bcwWK",
+              "stats": {
+                "kills": 11,
+                "deaths": 18
+              },
+              "is_calibrating": false,
+              "playerId": "550690b1-4c8e-4c7b-afce-9f8d828a2a8d"
+            },
+            {
+              "elo": 2824,
+              "elo_delta": -23,
+              "crosshair": "CSGO-x7LM7-jEncQ-sRBww-3dWfy-YnkzO",
+              "stats": {
+                "kills": 15,
+                "deaths": 16
+              },
+              "is_calibrating": false,
+              "playerId": "91896957-bf12-45cb-beb3-195a720e5684"
+            },
+            {
+              "elo": 3122,
+              "elo_delta": -23,
+              "crosshair": "CSGO-kcCNa-aKhUu-7TtBX-9emdT-pOfBN",
+              "stats": {
+                "kills": 13,
+                "deaths": 18
+              },
+              "is_calibrating": false,
+              "playerId": "ab85e9eb-01be-4757-ac94-433401360986"
+            }
+          ]
+        }
+      ],
+      "mvp_player_id": "9356a075-fedc-46ee-96f0-38371035e926"
+    }
+  }
+}

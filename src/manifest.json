@@ -1,0 +1,37 @@
+{
+  "manifest_version": 3,
+  "name": "FACEIT Crosshair Board",
+  "version": "0.1.0",
+  "description": "Your new tab shows the CS2 crosshairs FACEIT players used in their last 10 matches. Click one to copy its share code.",
+  "minimum_chrome_version": "120",
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "chrome_url_overrides": {
+    "newtab": "newtab.html"
+  },
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "permissions": ["storage", "alarms"],
+  "host_permissions": ["https://www.faceit.com/*"],
+  "content_scripts": [
+    {
+      "matches": ["https://www.faceit.com/*"],
+      "js": ["content/profilePage.js", "content/profileButton.js"],
+      "css": ["content/profileButton.css"],
+      "run_at": "document_idle"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["fonts/JetBrainsMono-Bold.woff2"],
+      "matches": ["https://www.faceit.com/*"],
+      "use_dynamic_url": true
+    }
+  ]
+}

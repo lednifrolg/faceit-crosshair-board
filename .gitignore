@@ -1,0 +1,20 @@
+# build output
+dist/
+*.zip
+
+# editor / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# node, in case tooling gets added later
+node_modules/
+npm-debug.log*
+
+# local working notes and throwaway experiments, never published
+PLAN.md
+spike/
+CLAUDE.md
+.claude/

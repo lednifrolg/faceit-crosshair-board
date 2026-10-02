@@ -1,0 +1,16 @@
+{
+  "result": "OK",
+  "payload": {
+    "id": "3b536dda-e3dd-40cd-baed-7e66ab050c8f",
+    "nickname": "ZywOo",
+    "avatar": "https://assets.faceit-cdn.net/avatars/3b536dda-e3dd-40cd-baed-7e66ab050c8f_1550499998143.png",
+    "country": "fr",
+    "games": {
+      "cs2": {
+        "faceit_elo": 3392,
+        "skill_level": 10,
+        "region": "EU"
+      }
+    }
+  }
+}

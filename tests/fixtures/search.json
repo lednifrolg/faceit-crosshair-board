@@ -1,0 +1,55 @@
+{
+  "payload": [
+    {
+      "id": "3b536dda-e3dd-40cd-baed-7e66ab050c8f",
+      "nickname": "ZywOo",
+      "country": "FR",
+      "avatar": "https://assets.faceit-cdn.net/avatars/3b536dda-e3dd-40cd-baed-7e66ab050c8f_1550499998143.png",
+      "verification_level": 3,
+      "games": [
+        {
+          "name": "cs2",
+          "region": "EU",
+          "skill_level": 0
+        },
+        {
+          "name": "csgo",
+          "region": "EU",
+          "skill_level": 0
+        }
+      ]
+    },
+    {
+      "id": "1b977170-de29-4501-8f33-641935aa6cb2",
+      "nickname": "ZywOo--_",
+      "country": "BR",
+      "avatar": "https://distribution.faceit-cdn.net/images/73b86724-a0b8-41fe-9333-2496bca4240e.jpeg",
+      "verification_level": 2,
+      "games": [
+        {
+          "name": "cs2",
+          "region": "SA",
+          "skill_level": 0
+        }
+      ]
+    },
+    {
+      "id": "676cba9a-b5f3-42c8-a045-b8a737d4f8f5",
+      "nickname": "Zywoo556",
+      "country": "HK",
+      "avatar": "",
+      "verification_level": 2,
+      "games": [
+        {
+          "name": "cs2",
+          "region": "SEA",
+          "skill_level": 0
+        }
+      ]
+    }
+  ],
+  "offset": 0,
+  "limit": 5,
+  "total": 1141,
+  "has_more": true
+}
