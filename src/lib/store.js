@@ -5,14 +5,15 @@
  *
  * storage.local (cache, rebuildable from the network):
  *   profiles: { [playerId]: { nickname, avatar, level, elo, fetchedAt } }
- *   history:  { [playerId]: { items: [{ matchId, date, map, score }], fetchedAt, failedAt } }
- *   matches:  { [matchId]: { status, crosshairs, attempts, lastAttemptAt } }
+ *   history:  { [playerId]: { items: [{ matchId, date, map, score, stats }], fetchedAt, failedAt } }
+ *   matches:  { [matchId]: { status, crosshairs, stats, attempts, lastAttemptAt } }
  *
  * Map, date and score live in the player's history, not in `matches`: the score is
  * "13 / 7" from that player's side, so two tracked players on opposite teams of one match
  * need different values. `matches` only holds what the scoreboard request produced, with
- * the crosshair of all ten players, so adding a teammate later costs no request for the
- * matches already cached. A match id with no `matches` entry has never been attempted.
+ * the crosshair and stats (FACEIT Rating included) of all ten players, so adding a
+ * teammate later costs no request for the matches already cached. History items carry
+ * the player's stats too, without a rating, for matches that have no scoreboard. A match id with no `matches` entry has never been attempted.
  *
  * The service worker is the only writer of storage.local. storage.sync `players` may also
  * be written by other contexts, so the worker treats changes to it as the source of truth
@@ -41,7 +42,7 @@ export const LocalKey = Object.freeze({
 });
 
 export const MatchStatus = Object.freeze({
-  OK: "ok",               // final: crosshairs stored
+  OK: "ok",               // final: crosshairs and stats stored
   NONE: "none",           // no advanced stats (yet); see NONE_RETRY_*
   ANONYMOUS: "anonymous", // err_f0: only a logged-in faceit.com session sees it; see ANONYMOUS_*
   ERROR: "error",         // FACEIT kept failing on this match (5xx, odd body); see ERROR_*
@@ -86,7 +87,8 @@ export function needsFetch(match, item, now) {
     case MatchStatus.ERROR:
       return match.attempts < ERROR_RETRY_LIMIT && since >= ERROR_RETRY_SPACING_MS;
     default:
-      return false; // ok is final
+      // ok is final, except a record from before stats were kept: one more request fills them.
+      return match.stats === undefined;
   }
 }
 
@@ -104,11 +106,12 @@ export function historyEntry(items, now) {
   const seen = new Set();
   const distinct = items.filter((it) => !seen.has(it.matchId) && seen.add(it.matchId));
   return {
-    items: distinct.slice(0, MATCHES_PER_PLAYER).map(({ matchId, date, map, score }) => ({
+    items: distinct.slice(0, MATCHES_PER_PLAYER).map(({ matchId, date, map, score, stats }) => ({
       matchId,
       date: date ?? null,
       map: map ?? null,
       score: score ?? null,
+      stats: stats ?? null,
     })),
     fetchedAt: now,
     failedAt: null,
@@ -120,24 +123,30 @@ export function profileEntry(profile, now) {
   return { nickname, avatar, level, elo, fetchedAt: now };
 }
 
-const record = (status, crosshairs) => (prev, now) => ({
+const record = (status, crosshairs, stats) => (prev, now) => ({
   status,
   crosshairs,
+  stats,
   attempts: (prev?.status === status ? prev.attempts ?? 0 : 0) + 1,
   lastAttemptAt: now,
 });
 
+/* A refetch of an ok record (see needsFetch) that fails keeps the crosshairs it had, and
+ * empty stats so it isn't fetched again. */
+const failedRecord = (status) => (prev, now) =>
+  prev?.status === MatchStatus.OK ? { ...prev, stats: prev.stats ?? {}, lastAttemptAt: now } : record(status, {}, {})(prev, now);
+
 /** The match record after a scoreboard request (`parseScoreboard` output) came back. */
 export function scoreboardRecord(prev, scoreboard, now) {
-  return scoreboard.hasStats ? record(MatchStatus.OK, scoreboard.crosshairs)(prev, now) : noStatsRecord(prev, now);
+  return scoreboard.hasStats ? record(MatchStatus.OK, scoreboard.crosshairs, scoreboard.stats ?? {})(prev, now) : noStatsRecord(prev, now);
 }
 
 /** After a 404 or an empty scoreboard. */
-export const noStatsRecord = (prev, now) => record(MatchStatus.NONE, {})(prev, now);
+export const noStatsRecord = failedRecord(MatchStatus.NONE);
 /** After an err_f0. */
-export const anonymousRecord = (prev, now) => record(MatchStatus.ANONYMOUS, {})(prev, now);
+export const anonymousRecord = failedRecord(MatchStatus.ANONYMOUS);
 /** After the queue gave up on the match's job. */
-export const errorRecord = (prev, now) => record(MatchStatus.ERROR, {})(prev, now);
+export const errorRecord = failedRecord(MatchStatus.ERROR);
 
 /** `matches` without entries no tracked player's history refers to any more. */
 export function collectGarbage(matches, history) {
@@ -167,6 +176,11 @@ export const CellState = Object.freeze({
  * cell has no code). `keyOf(code)` maps a share code to what identifies the crosshair; the
  * page passes one that decodes, because the same crosshair has different codes across
  * share code formats. Without it, codes are compared as strings.
+ *
+ * `stats` are the player's in that match: the scoreboard's, which carry the FACEIT Rating,
+ * else the history's (no rating), which also cover matches without a scoreboard.
+ * Cells with a code also get `withCrosshair` and `withOthers` (see combineStats): the
+ * player's stats over the row's matches with this crosshair, and with any other one.
  */
 export function rowCells(playerId, historyEntry, matches, now, keyOf = (code) => code) {
   if (!historyEntry?.fetchedAt) {
@@ -186,10 +200,12 @@ export function rowCells(playerId, historyEntry, matches, now, keyOf = (code) =>
     let state;
     let code = null;
     let final = false;
+    let stats = null;
     if (!match) {
       state = CellState.LOADING;
     } else if (match.status === MatchStatus.OK) {
       code = match.crosshairs?.[playerId] ?? null;
+      stats = match.stats?.[playerId] ?? null;
       state = code ? CellState.CODE : CellState.NO_CODE;
     } else if (match.status === MatchStatus.NONE) {
       if (needsFetch(match, item, now)) state = CellState.LOADING;
@@ -200,7 +216,7 @@ export function rowCells(playerId, historyEntry, matches, now, keyOf = (code) =>
       state = CellState.ERROR;
       final = !needsFetch(match, item, now) && match.attempts >= ERROR_RETRY_LIMIT;
     }
-    cells.push({ state, matchId: item.matchId, date: item.date, map: item.map, score: item.score, code, changed: null, final });
+    cells.push({ state, matchId: item.matchId, date: item.date, map: item.map, score: item.score, stats: stats ?? item.stats ?? null, code, changed: null, final });
   }
   let older = null; // walk oldest -> newest so each cell sees the nearest older crosshair
   for (let i = cells.length - 1; i >= 0; i--) {
@@ -210,7 +226,38 @@ export function rowCells(playerId, historyEntry, matches, now, keyOf = (code) =>
     if (older != null) c.changed = key !== older;
     older = key;
   }
+  // How the player did with each cell's crosshair, against the other crosshairs in the row.
+  const known = cells.filter((c) => c.code && c.stats);
+  for (const c of cells) {
+    if (!c.code) continue;
+    const key = keyOf(c.code);
+    c.withCrosshair = combineStats(known.filter((o) => keyOf(o.code) === key).map((o) => o.stats));
+    c.withOthers = combineStats(known.filter((o) => keyOf(o.code) !== key).map((o) => o.stats));
+  }
   return cells;
+}
+
+/**
+ * Several matches' stats as one: `{ matches, rating, kd, adr }`, or null for none. K/D is
+ * total kills over total deaths; rating and ADR are weighted by rounds, as one long match
+ * would count them, so a short stomp doesn't weigh as much as a full 13-11. Matches that
+ * lack a value (no rating in history stats) are left out of that value only.
+ */
+export function combineStats(list) {
+  if (!list.length) return null;
+  const sum = (f) => list.reduce((n, s) => n + (f(s) ?? 0), 0);
+  const perRound = (field) => {
+    const has = (s) => s[field] != null && s.rounds != null;
+    const rounds = sum((s) => (has(s) ? s.rounds : 0));
+    return rounds ? sum((s) => (has(s) ? s[field] * s.rounds : 0)) / rounds : null;
+  };
+  const deaths = sum((s) => s.deaths);
+  return {
+    matches: list.length,
+    rating: perRound("rating"),
+    kd: deaths ? sum((s) => s.kills) / deaths : null,
+    adr: perRound("adr"),
+  };
 }
 
 // ---------------------------------------------------------------- storage

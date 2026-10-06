@@ -179,7 +179,9 @@ export function parseSearch(json) {
 }
 
 /* A bare array, newest first. Items carry two match ids: `_id.matchId` is an internal hex
- * id, the top-level `matchId` (`1-<uuid>`) is the one the room URL and the scoreboard use. */
+ * id, the top-level `matchId` (`1-<uuid>`) is the one the room URL and the scoreboard use.
+ * The player's own stats come along under FACEIT's coded keys. They have no FACEIT
+ * Rating (the scoreboard does), but they are there for matches without a scoreboard. */
 export function parseHistory(json) {
   if (!Array.isArray(json)) throw new ApiError(ErrorKind.BAD_BODY);
   return json
@@ -191,23 +193,58 @@ export function parseHistory(json) {
       score: m.i18 || null,
       elo: num(m.elo),
       eloDelta: num(pick(m, "elo_delta", "eloDelta")),
+      stats: parseMatchStats(m),
     }));
 }
 
-/* Crosshairs of everyone in the match, keyed by player id, so one request serves every
- * tracked player who was in it. A match without advanced stats comes back as a 404 (see
- * interpret) or, occasionally, as a 200 with no teams; `hasStats` covers the latter. */
+/* One player's stats in one match, the same shape from either source; null when FACEIT
+ * left them out. `hs` is a percent of kills, `rating` the FACEIT Rating. */
+const matchStats = (stats) => (stats.kills == null || stats.deaths == null ? null : stats);
+
+export const parseMatchStats = (m) =>
+  matchStats({
+    kills: num(m.i6),
+    assists: num(m.i7),
+    deaths: num(m.i8),
+    rounds: num(m.i12),
+    kd: num(m.c2),
+    adr: num(m.c10),
+    hs: num(m.c4),
+    rating: null,
+  });
+
+/** A scoreboard player's `stats`. Values come unrounded; the board rounds for display. */
+export function parseScoreboardStats(s) {
+  const hsRate = num(pick(s, "hsRate", "hs_rate"));
+  return matchStats({
+    kills: num(s?.kills),
+    assists: num(s?.assists),
+    deaths: num(s?.deaths),
+    rounds: num(pick(s, "roundsPlayed", "rounds_played")),
+    kd: num(s?.kd),
+    adr: num(s?.adr),
+    hs: hsRate == null ? null : hsRate * 100,
+    rating: num(pick(s, "faceitRating", "faceit_rating")),
+  });
+}
+
+/* Crosshairs and stats of everyone in the match, keyed by player id, so one request serves
+ * every tracked player who was in it. A match without advanced stats comes back as a 404
+ * (see interpret) or, occasionally, as a 200 with no teams; `hasStats` covers the latter. */
 export function parseScoreboard(json) {
   const teams = json?.payload?.cs2?.teams;
   if (json?.payload == null) throw new ApiError(ErrorKind.BAD_BODY);
   const crosshairs = {};
+  const stats = {};
   for (const team of Array.isArray(teams) ? teams : []) {
     for (const pl of team?.players ?? []) {
       const id = pick(pl, "playerId", "player_id");
-      if (id) crosshairs[id] = pl.crosshair || null;
+      if (!id) continue;
+      crosshairs[id] = pl.crosshair || null;
+      stats[id] = parseScoreboardStats(pl.stats);
     }
   }
-  return { hasStats: Object.keys(crosshairs).length > 0, crosshairs };
+  return { hasStats: Object.keys(crosshairs).length > 0, crosshairs, stats };
 }
 
 // --------------------------------------------------------------- endpoints

@@ -63,6 +63,11 @@ attaches `faceit-crosshair-board-vX.Y.Z.zip` (`src/` plus `LICENSE`, `THIRD-PART
   Don't turn it into a deep equality check.
 - **Map, date and score live in each player's history, not in `matches`.** The score is
   from that player's side, so opponents in a shared match need different values.
+- **Stats come from two places.** The scoreboard (kept in `matches`, for all ten players)
+  has the FACEIT Rating and matches the match room's numbers; the history has no rating
+  but covers matches without a scoreboard. The board prefers the scoreboard's.
+- **An `ok` match without `stats` is fetched once more.** Versions before stats stored
+  only crosshairs; if that refetch fails the crosshairs are kept (`failedRecord`).
 - **Nickname lookup is case sensitive and that's kept.** FACEIT has distinct accounts that
   differ only by case (`scream` vs `ScreaM`), so the exact match wins and search is only
   the fallback.

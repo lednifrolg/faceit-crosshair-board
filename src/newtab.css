@@ -263,6 +263,22 @@ html, .board { scrollbar-color: var(--line-hi) var(--bg); }
   border-right: 10px solid transparent;
 }
 
+/* The player's FACEIT Rating in that match. Its own background, so a large crosshair under it
+ * can't make it unreadable. */
+.cell .rating {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  padding: 0 3px;
+  background: var(--bg);
+  color: var(--fg-2);
+  font-size: 10px;
+  line-height: 14px;
+  font-variant-numeric: tabular-nums;
+}
+
+.cell .rating.low { color: var(--fg-3); }
+
 .cell.empty {
   border-style: dashed;
   border-color: #00ff4114;
@@ -295,7 +311,7 @@ html, .board { scrollbar-color: var(--line-hi) var(--bg); }
 .tip {
   position: fixed;
   z-index: 10;
-  max-width: 360px;
+  max-width: 400px;
   padding: 8px 10px;
   border: 1px solid var(--line-hi);
   background: #000;
@@ -313,6 +329,10 @@ html, .board { scrollbar-color: var(--line-hi) var(--bg); }
 .tip .tip-hint { color: var(--fg-3); }
 
 .tip .tip-new { color: var(--accent); }
+
+.tip .tip-stats { color: var(--fg); font-variant-numeric: tabular-nums; }
+
+.tip .tip-sum { white-space: pre; }
 
 @media (prefers-reduced-motion: reduce) {
   .cursor, .cell.loading::after { animation: none; }

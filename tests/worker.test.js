@@ -22,7 +22,7 @@ function fakeFaceit(clock) {
   const scoreboard = (matchId) => ({
     payload: {
       id: matchId,
-      cs2: { teams: [{ score: 13, players: Object.keys(histories).map((id) => ({ player_id: id, crosshair: `CODE-${id}` })) }, { score: 7, players: [] }] },
+      cs2: { teams: [{ score: 13, players: Object.keys(histories).map((id) => ({ player_id: id, crosshair: `CODE-${id}`, stats: { kills: 20, deaths: 10, rounds_played: 20, faceit_rating: 1.25 } })) }, { score: 7, players: [] }] },
     },
   });
   const { impl, calls } = fakeFetch((path) => {
@@ -84,6 +84,25 @@ test("cold fill: one history per player, each shared match fetched once, newest 
   assert.equal(s.local().matches.shared.crosshairs.pb, "CODE-pb", "crosshairs of everyone in the match are kept");
   const cells = rowCells("pa", s.local().history.pa, s.local().matches, s.clock.t);
   assert.ok(cells.every((c) => c.state === CellState.CODE));
+});
+
+test("matches cached before stats were kept are fetched once more for them", async () => {
+  const s = setup({ players: ["pa"] });
+  s.faceit.histories.pa = ids("a", 3);
+  await s.start();
+  for (const m of Object.values(s.local().matches)) delete m.stats; // as an older version stored them
+  const before = s.faceit.scoreboardCalls().length;
+
+  s.clock.t += HISTORY_STALE_MS + 1;
+  await s.worker.refresh();
+  await s.worker.pump();
+  assert.equal(s.faceit.scoreboardCalls().length - before, 3);
+  assert.equal(s.local().matches.a0.stats.pa.rating, 1.25);
+
+  s.clock.t += HISTORY_STALE_MS + 1;
+  await s.worker.refresh();
+  await s.worker.pump();
+  assert.equal(s.faceit.scoreboardCalls().length - before, 3, "and only once");
 });
 
 test("scoreboard requests are paced from the rate-limit headers", async () => {

@@ -5,7 +5,7 @@ import {
   MatchStatus, CellState, AddResult, MAX_PLAYERS, NONE_RETRY_SPACING_MS, NONE_RETRY_WINDOW_MS,
   ANONYMOUS_RETRY_SPACING_MS, ERROR_RETRY_LIMIT, ERROR_RETRY_SPACING_MS,
   needsFetch, matchesToFetch, historyEntry, scoreboardRecord, noStatsRecord, anonymousRecord, errorRecord,
-  collectGarbage, rowCells, addPlayer, removePlayer, pruneLocal,
+  collectGarbage, rowCells, combineStats, addPlayer, removePlayer, pruneLocal,
   saveHistory, saveHistoryFailure, saveMatch,
 } from "../src/lib/store.js";
 import { parseHistory, parseScoreboard } from "../src/lib/api.js";
@@ -18,7 +18,8 @@ const ZYWOO = "3b536dda-e3dd-40cd-baed-7e66ab050c8f";
 test("needsFetch: unseen, final and retryable matches", () => {
   const fresh = { date: NOW - 1 * H };
   assert.equal(needsFetch(undefined, fresh, NOW), true);
-  assert.equal(needsFetch({ status: MatchStatus.OK, attempts: 1 }, fresh, NOW), false);
+  assert.equal(needsFetch({ status: MatchStatus.OK, attempts: 1, stats: {} }, fresh, NOW), false);
+  assert.equal(needsFetch({ status: MatchStatus.OK, attempts: 1 }, fresh, NOW), true, "from before stats were kept");
 
   const none = (attempts, lastAttemptAt) => ({ status: MatchStatus.NONE, attempts, lastAttemptAt });
   assert.equal(needsFetch(none(1, NOW - NONE_RETRY_SPACING_MS), fresh, NOW), true);
@@ -43,13 +44,16 @@ test("a no-stats match is tried at most three times", () => {
 
 test("matchesToFetch keeps history order", () => {
   const items = [{ matchId: "a", date: NOW }, { matchId: "b", date: NOW }, { matchId: "c", date: NOW }];
-  assert.deepEqual(matchesToFetch(items, { b: { status: MatchStatus.OK } }, NOW), ["a", "c"]);
+  assert.deepEqual(matchesToFetch(items, { b: { status: MatchStatus.OK, stats: {} } }, NOW), ["a", "c"]);
 });
 
 test("historyEntry caps at 10 and keeps only board fields", () => {
   const entry = historyEntry([...parseHistory(json("history.json")), { matchId: "extra" }], NOW);
   assert.equal(entry.items.length, 10);
-  assert.deepEqual(entry.items[0], { matchId: "1-d98dfbef-ffda-40d4-9bce-7d36de789c0b", date: 1790542675000, map: "de_nuke", score: "13 / 7" });
+  assert.deepEqual(entry.items[0], {
+    matchId: "1-d98dfbef-ffda-40d4-9bce-7d36de789c0b", date: 1790542675000, map: "de_nuke", score: "13 / 7",
+    stats: { kills: 21, assists: 4, deaths: 13, rounds: 20, kd: 1.62, adr: 108.9, hs: 67, rating: null },
+  });
   assert.equal(entry.fetchedAt, NOW);
 });
 
@@ -155,6 +159,59 @@ test("rowCells: keyOf decides what counts as a change", () => {
   assert.equal(rowCells("me", history, matches, NOW)[0].changed, true, "strings differ");
   const keyOf = (code) => code.replace(/^CS(GO)?-/, "");
   assert.equal(rowCells("me", history, matches, NOW, keyOf)[0].changed, false, "same crosshair");
+});
+
+test("rowCells: stats per crosshair, against the row's other crosshairs", () => {
+  const stats = (kills, deaths, rounds, adr, rating = null) => ({ kills, assists: 0, deaths, rounds, kd: kills / deaths, adr, hs: 50, rating });
+  const ok = (code, s) => ({ status: MatchStatus.OK, crosshairs: { me: code }, stats: s ? { me: s } : {}, attempts: 1 });
+  const history = {
+    items: [
+      { matchId: "a1", stats: stats(1, 1, 1, 1) },     // the scoreboard's stats win
+      { matchId: "b1", stats: stats(10, 20, 24, 60) }, // only history stats: no rating
+      { matchId: "a2", stats: null },
+      { matchId: "a3", stats: null },                  // no stats at all: not counted
+      { matchId: "x", stats: stats(30, 5, 20, 150) },  // crosshair unknown: not counted
+    ],
+    fetchedAt: NOW,
+  };
+  const matches = {
+    a1: ok("A", stats(20, 10, 20, 100, 1.4)),
+    b1: ok("B"),
+    a2: ok("A", stats(10, 10, 30, 80, 0.9)),
+    a3: ok("A"),
+    x: { status: MatchStatus.ANONYMOUS, crosshairs: {}, stats: {}, attempts: 1, lastAttemptAt: NOW },
+  };
+  const [a1, b1, , a3, x] = rowCells("me", history, matches, NOW);
+  assert.equal(a1.stats.rating, 1.4);
+  assert.equal(b1.stats.kills, 10, "falls back to the history's stats");
+  // 30 kills / 20 deaths; rating (1.4*20 + 0.9*30) / 50 rounds, ADR (100*20 + 80*30) / 50.
+  assert.deepEqual(a1.withCrosshair, { matches: 2, rating: 1.1, kd: 1.5, adr: 88 });
+  assert.deepEqual(a1.withOthers, { matches: 1, rating: null, kd: 0.5, adr: 60 });
+  assert.deepEqual(a3.withCrosshair, a1.withCrosshair, "a cell without stats still gets its crosshair's");
+  assert.deepEqual(b1.withOthers, a1.withCrosshair);
+  assert.equal(x.withCrosshair, undefined);
+  assert.equal(x.stats.kills, 30, "own stats show even without a crosshair");
+});
+
+test("combineStats: no matches, no deaths, no rounds", () => {
+  assert.equal(combineStats([]), null);
+  assert.deepEqual(combineStats([{ kills: 5, deaths: 0, rounds: null, adr: 90, rating: 1.2 }]), { matches: 1, rating: null, kd: null, adr: null });
+});
+
+test("an ok match from before stats is fetched once more, and keeps its crosshairs if that fails", () => {
+  const old = { status: MatchStatus.OK, crosshairs: { me: "A" }, attempts: 1, lastAttemptAt: 0 };
+  const item = { matchId: "m", date: 0 };
+  assert.equal(needsFetch(old, item, NOW), true);
+  for (const failed of [noStatsRecord, anonymousRecord, errorRecord]) {
+    const rec = failed(old, NOW);
+    assert.equal(rec.status, MatchStatus.OK);
+    assert.deepEqual(rec.crosshairs, { me: "A" });
+    assert.equal(needsFetch(rec, item, NOW + 100 * H), false);
+  }
+  const sb = parseScoreboard(json("scoreboard.json"));
+  const filled = scoreboardRecord(old, sb, NOW);
+  assert.equal(filled.stats[ZYWOO].rating.toFixed(2), "1.26");
+  assert.equal(needsFetch(filled, item, NOW + 100 * H), false);
 });
 
 test("createStore serialises overlapping updates", async () => {

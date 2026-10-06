@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "FACEIT Crosshair Board",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Your new tab shows the CS2 crosshairs FACEIT players used in their last 10 matches. Click one to copy its share code.",
   "minimum_chrome_version": "120",
   "icons": {

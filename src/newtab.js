@@ -66,6 +66,23 @@ function stamp(epochMs) {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
 
+const fixed2 = (v) => (v == null ? "?" : v.toFixed(2));
+const whole = (v) => (v == null ? "?" : String(Math.round(v)));
+
+/** "rating 1.26 · K/D/A 21/13/4 · ADR 108 · HS 67%", in the match room's K/D/A order. */
+function statsLine(s) {
+  const parts = [`K/D/A ${s.kills}/${s.deaths}/${s.assists ?? "?"}`, `ADR ${whole(s.adr)}`];
+  if (s.rating != null) parts.unshift(`rating ${fixed2(s.rating)}`);
+  if (s.hs != null) parts.push(`HS ${whole(s.hs)}%`);
+  return parts.join(" · ");
+}
+
+/** "this crosshair   6 matches  rating 1.30  ADR  85", for combineStats output. Padded
+ * so the lines of the tooltip line up as a table. */
+const combinedLine = (label, c) =>
+  [label.padEnd(14), `${String(c.matches).padStart(2)} ${c.matches === 1 ? "match  " : "matches"}`,
+    `rating ${fixed2(c.rating)}`, `ADR ${whole(c.adr).padStart(3)}`].join("  ");
+
 const profileUrl = (nickname) => `https://www.faceit.com/en/players/${encodeURIComponent(nickname)}`;
 
 // --------------------------------------------------------------------- status
@@ -131,7 +148,17 @@ function isRetrying(matchId) {
  * index guarantees that even for a history that lists a match twice. */
 function cellKey(playerId, cell, i) {
   if (cell.state === CellState.EMPTY || cell.history) return `${playerId}|${cell.state}|${i}`;
-  return `${playerId}|${i}|${cell.matchId}|${cell.state}|${cell.code}|${cell.changed}|${cell.final}`;
+  return `${playerId}|${i}|${cell.matchId}|${cell.state}|${cell.code}|${cell.changed}|${cell.final}|${cell.stats?.rating}`;
+}
+
+/* The player's FACEIT Rating in that match, in the corner: how a crosshair went at a
+ * glance. 1.00 is FACEIT's average. */
+function ratingBadge(stats) {
+  if (stats?.rating == null) return null;
+  const badge = el("span", "rating", fixed2(stats.rating));
+  badge.classList.toggle("low", stats.rating < 1);
+  badge.setAttribute("aria-hidden", "true");
+  return badge;
 }
 
 function cellNode(cell, nickname, isLatest) {
@@ -146,25 +173,24 @@ function cellNode(cell, nickname, isLatest) {
     node.setAttribute("aria-hidden", "true");
     return node;
   }
+  const badge = cell.history ? null : ratingBadge(cell.stats);
   if (cell.state === CellState.LOADING) {
     node.classList.add("loading");
     node.setAttribute("aria-label", "loading");
-    return node;
-  }
-  if (cell.state !== CellState.CODE) {
+  } else if (cell.state !== CellState.CODE) {
     node.textContent = CELL_TEXT[cell.state][0];
     if (cell.state === CellState.PENDING) node.classList.add("pending");
     if (RETRYABLE.has(cell.state) && cell.matchId) node.classList.add("retry");
-    return node;
+  } else {
+    node.classList.add("has-code");
+    if (cell.changed === true) node.classList.add("changed");
+    if (cell.changed === false && !isLatest) node.classList.add("same");
+    node.setAttribute("aria-label", `copy ${cell.code}${cell.stats?.rating != null ? `, rating ${fixed2(cell.stats.rating)}` : ""}`);
+    const art = renderCode(cell.code);
+    if (art.canvas) node.append(art.canvas);
+    else node.textContent = art.text;
   }
-
-  node.classList.add("has-code");
-  if (cell.changed === true) node.classList.add("changed");
-  if (cell.changed === false && !isLatest) node.classList.add("same");
-  node.setAttribute("aria-label", `copy ${cell.code}`);
-  const art = renderCode(cell.code);
-  if (art.canvas) node.append(art.canvas);
-  else node.textContent = art.text;
+  if (badge) node.append(badge);
   return node;
 }
 
@@ -218,7 +244,10 @@ function boardChildren() {
     keep(`player|${player.id}|${player.nickname}|${profile?.level}|${profile?.elo}`, () => playerHead(player, profile));
     rowCells(player.id, state.history[player.id], state.matches, now, crosshairKey).forEach((cell, i) => {
       if (cell.matchId && isRetrying(cell.matchId)) cell = { ...cell, state: CellState.LOADING };
-      keep(cellKey(player.id, cell, i), () => cellNode(cell, player.nickname, i === 0));
+      const key = cellKey(player.id, cell, i);
+      // A kept node still gets the fresh cell: its per-crosshair stats move with the row.
+      if (nodes.has(key)) cellInfo.set(nodes.get(key), { cell, nickname: player.nickname });
+      keep(key, () => cellNode(cell, player.nickname, i === 0));
     });
   }
   return out;
@@ -259,9 +288,15 @@ function tipLines({ cell }) {
   const lines = [];
   lines.push(["tip-head", [cell.map, cell.score].filter(Boolean).join(" · ") || "match"]);
   if (cell.date) lines.push([null, `${stamp(cell.date)} (${ago(Date.now() - cell.date)})`]);
+  if (cell.stats) lines.push(["tip-stats", statsLine(cell.stats)]);
   if (cell.state === CellState.CODE) {
     lines.push(["tip-code", cell.code]);
     if (cell.changed) lines.push(["tip-new", "changed since the match before"]);
+    // Only worth a line when it says more than this match's own stats.
+    if (cell.withCrosshair && (cell.withCrosshair.matches > 1 || cell.withOthers)) {
+      lines.push(["tip-sum", combinedLine("this crosshair", cell.withCrosshair)]);
+      if (cell.withOthers) lines.push(["tip-sum", combinedLine("other ones", cell.withOthers)]);
+    }
     lines.push(["tip-hint", "click to copy"]);
   } else {
     lines.push(["tip-hint", cellTip(cell)]);

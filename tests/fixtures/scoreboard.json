@@ -17,8 +17,14 @@
               "elo_delta": 21,
               "crosshair": "CSGO-NPuOr-zzw65-BoYMd-pBYmK-POz9H",
               "stats": {
+                "rounds_played": 20,
                 "kills": 13,
-                "deaths": 14
+                "deaths": 14,
+                "assists": 4,
+                "adr": 69.6,
+                "kd": 0.9285714,
+                "hs_rate": 0.6923077,
+                "faceit_rating": 1.0971199
               },
               "is_calibrating": false
             },
@@ -28,8 +34,14 @@
               "elo_delta": 21,
               "crosshair": "CSGO-cza9w-45DzL-WJKz5-YO593-RL3fF",
               "stats": {
+                "rounds_played": 20,
                 "kills": 21,
-                "deaths": 12
+                "deaths": 12,
+                "assists": 6,
+                "adr": 104.35,
+                "kd": 1.75,
+                "hs_rate": 0.7619048,
+                "faceit_rating": 1.4597409
               },
               "is_calibrating": false
             },
@@ -39,8 +51,14 @@
               "elo_delta": 21,
               "crosshair": "CSGO-nvYhy-b3GHp-4vbQP-uoTxh-jTzTC",
               "stats": {
+                "rounds_played": 20,
                 "kills": 13,
-                "deaths": 14
+                "deaths": 14,
+                "assists": 4,
+                "adr": 67.5,
+                "kd": 0.9285714,
+                "hs_rate": 0.46153846,
+                "faceit_rating": 1.0622598
               },
               "is_calibrating": false
             },
@@ -50,8 +68,14 @@
               "elo_delta": 21,
               "crosshair": "CSGO-43Xd3-akOjE-fOHmW-GoRhM-sPcAB",
               "stats": {
+                "rounds_played": 20,
                 "kills": 21,
-                "deaths": 13
+                "deaths": 13,
+                "assists": 4,
+                "adr": 108.15,
+                "kd": 1.6153846,
+                "hs_rate": 0.6666667,
+                "faceit_rating": 1.2557269
               },
               "is_calibrating": false
             },
@@ -61,8 +85,14 @@
               "elo_delta": 21,
               "crosshair": "CSGO-VpGLE-fWvPH-q5P6H-PO9DZ-6hzsP",
               "stats": {
+                "rounds_played": 20,
                 "kills": 16,
-                "deaths": 14
+                "deaths": 14,
+                "assists": 4,
+                "adr": 89.45,
+                "kd": 1.1428572,
+                "hs_rate": 0.6875,
+                "faceit_rating": 1.227514
               },
               "is_calibrating": false
             }
@@ -80,8 +110,14 @@
               "elo_delta": -23,
               "crosshair": "CSGO-2rttS-Lemby-E67JC-RTvS4-jnkzO",
               "stats": {
+                "rounds_played": 20,
                 "kills": 14,
-                "deaths": 15
+                "deaths": 15,
+                "assists": 2,
+                "adr": 64.95,
+                "kd": 0.93333334,
+                "hs_rate": 0.42857143,
+                "faceit_rating": 0.97691673
               },
               "is_calibrating": false
             },
@@ -91,8 +127,14 @@
               "elo_delta": -23,
               "crosshair": "CSGO-ibGNo-nOUBV-NEmcO-bnUmY-7reRF",
               "stats": {
+                "rounds_played": 20,
                 "kills": 14,
-                "deaths": 17
+                "deaths": 17,
+                "assists": 4,
+                "adr": 67.6,
+                "kd": 0.8235294,
+                "hs_rate": 0.42857143,
+                "faceit_rating": 0.99116486
               },
               "is_calibrating": false
             },
@@ -102,8 +144,14 @@
               "elo_delta": -23,
               "crosshair": "CSGO-yYDdn-owBnk-Czt8a-tc6Cx-bcwWK",
               "stats": {
+                "rounds_played": 20,
                 "kills": 11,
-                "deaths": 18
+                "deaths": 18,
+                "assists": 5,
+                "adr": 66.45,
+                "kd": 0.6111111,
+                "hs_rate": 0.54545456,
+                "faceit_rating": 0.72748786
               },
               "is_calibrating": false
             },
@@ -113,8 +161,14 @@
               "elo_delta": -23,
               "crosshair": "CSGO-x7LM7-jEncQ-sRBww-3dWfy-YnkzO",
               "stats": {
+                "rounds_played": 20,
                 "kills": 15,
-                "deaths": 16
+                "deaths": 16,
+                "assists": 4,
+                "adr": 81.65,
+                "kd": 0.9375,
+                "hs_rate": 0.53333336,
+                "faceit_rating": 1.0956926
               },
               "is_calibrating": false
             },
@@ -124,8 +178,14 @@
               "elo_delta": -23,
               "crosshair": "CSGO-kcCNa-aKhUu-7TtBX-9emdT-pOfBN",
               "stats": {
+                "rounds_played": 20,
                 "kills": 13,
-                "deaths": 18
+                "deaths": 18,
+                "assists": 7,
+                "adr": 84,
+                "kd": 0.7222222,
+                "hs_rate": 0.6923077,
+                "faceit_rating": 0.87822217
               },
               "is_calibrating": false
             }

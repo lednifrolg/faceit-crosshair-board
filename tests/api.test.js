@@ -94,7 +94,13 @@ test("parseHistory uses the room match id, not _id.matchId", () => {
     score: "13 / 7",
     elo: 3392,
     eloDelta: 21,
+    stats: { kills: 21, assists: 4, deaths: 13, rounds: 20, kd: 1.62, adr: 108.9, hs: 67, rating: null },
   });
+});
+
+test("parseHistory leaves stats null when FACEIT omits them", () => {
+  const [item] = parseHistory([{ matchId: "1-x", date: 1, i1: "de_nuke" }]);
+  assert.equal(item.stats, null);
 });
 
 test("parseScoreboard reads both id casings to the same result", () => {
@@ -104,10 +110,16 @@ test("parseScoreboard reads both id casings to the same result", () => {
   assert.equal(snake.hasStats, true);
   assert.equal(Object.keys(snake.crosshairs).length, 10);
   assert.equal(snake.crosshairs["3b536dda-e3dd-40cd-baed-7e66ab050c8f"], "CSGO-43Xd3-akOjE-fOHmW-GoRhM-sPcAB");
+  // ZywOo's line in the match room's General tab: rating 1.26, 21/13/4, ADR 108.2, 66.7% HS.
+  const zywoo = snake.stats["3b536dda-e3dd-40cd-baed-7e66ab050c8f"];
+  assert.deepEqual(
+    { ...zywoo, kd: zywoo.kd.toFixed(2), adr: zywoo.adr.toFixed(1), hs: zywoo.hs.toFixed(1), rating: zywoo.rating.toFixed(2) },
+    { kills: 21, assists: 4, deaths: 13, rounds: 20, kd: "1.62", adr: "108.2", hs: "66.7", rating: "1.26" },
+  );
 });
 
 test("parseScoreboard: no teams means no stats", () => {
-  assert.deepEqual(parseScoreboard({ payload: { cs2: { teams: [] } } }), { hasStats: false, crosshairs: {} });
+  assert.deepEqual(parseScoreboard({ payload: { cs2: { teams: [] } } }), { hasStats: false, crosshairs: {}, stats: {} });
   assert.throws(() => parseScoreboard({}), ApiError);
 });
 

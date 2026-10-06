@@ -7,6 +7,8 @@ FACEIT player you pick, showing the crosshair they used in each of their last 10
 
 - Click a crosshair to copy its share code.
 - An orange corner marks a crosshair that changed since the match before.
+- The corner number is the player's FACEIT Rating in that match. Hover for the full
+  stats, and for how they did with that crosshair compared with the others.
 - Add players on the new tab, or with the button on any FACEIT profile.
 
 ## Install
