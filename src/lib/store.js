@@ -97,10 +97,14 @@ export function matchesToFetch(items, matches, now) {
 
 // --------------------------------------------------------------- records
 
-/** History items as stored: newest first, capped, only the fields the board shows. */
+/** History items as stored: newest first, capped, only the fields the board shows. FACEIT
+ * now and then lists one match twice; only its first (newest) listing is kept, so the
+ * row still holds ten distinct matches. */
 export function historyEntry(items, now) {
+  const seen = new Set();
+  const distinct = items.filter((it) => !seen.has(it.matchId) && seen.add(it.matchId));
   return {
-    items: items.slice(0, MATCHES_PER_PLAYER).map(({ matchId, date, map, score }) => ({
+    items: distinct.slice(0, MATCHES_PER_PLAYER).map(({ matchId, date, map, score }) => ({
       matchId,
       date: date ?? null,
       map: map ?? null,

@@ -126,9 +126,12 @@ function isRetrying(matchId) {
   return true;
 }
 
+/* Keys must be unique within a render: two cells sharing one would get the same node, the
+ * grid would lose a child and every later cell would slide one column over. The column
+ * index guarantees that even for a history that lists a match twice. */
 function cellKey(playerId, cell, i) {
   if (cell.state === CellState.EMPTY || cell.history) return `${playerId}|${cell.state}|${i}`;
-  return `${playerId}|${cell.matchId}|${cell.state}|${cell.code}|${cell.changed}|${cell.final}|${i === 0}`;
+  return `${playerId}|${i}|${cell.matchId}|${cell.state}|${cell.code}|${cell.changed}|${cell.final}`;
 }
 
 function cellNode(cell, nickname, isLatest) {

@@ -53,6 +53,14 @@ test("historyEntry caps at 10 and keeps only board fields", () => {
   assert.equal(entry.fetchedAt, NOW);
 });
 
+test("historyEntry keeps the newest listing of a match FACEIT lists twice", () => {
+  const items = Array.from({ length: 11 }, (_, i) => ({ matchId: `m${i}`, date: NOW - i, map: `map${i}` }));
+  items.splice(2, 0, { ...items[1], map: "dup" });
+  const entry = historyEntry(items, NOW);
+  assert.deepEqual(entry.items.map((it) => it.matchId), ["m0", "m1", "m2", "m3", "m4", "m5", "m6", "m7", "m8", "m9"]);
+  assert.equal(entry.items[1].map, "map1");
+});
+
 test("records count attempts", () => {
   const sb = parseScoreboard(json("scoreboard.json"));
   const ok = scoreboardRecord(noStatsRecord(undefined, NOW), sb, NOW + 1);
